@@ -12,14 +12,18 @@ license = "Apache-2.0"
 keywords = []
 authors = []
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Programming Language :: Python",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Framework :: AsyncIO",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
 ]
 [tool.hatch.build.targets.sdist]
 include = ["/src", "/tests"]
@@ -34,7 +38,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-instruments = ["eventiq"]
+instruments = ["eventiq>=1.0.0"]
 
 [project.entry-points.opentelemetry_instrumentor]
 eventiq = "opentelemetry.instrumentation.eventiq:EventiqInstrumentator"
@@ -49,17 +53,17 @@ path = "src/opentelemetry/instrumentation/eventiq/version.py"
 
 [tool.hatch.envs.default]
 dependencies = [
-    "eventiq==0.3.0rc1",
+    "eventiq>=1.0.0",
     "pytest",
     "pyyaml",
     "pytest-cov",
     "ruff",
-    "mypy>=1.0.0",
+    "mypy",
     "bandit",
+    "opentelemetry-test-utils",
     "opentelemetry-api",
     "opentelemetry-semantic-conventions",
     "opentelemetry-instrumentation",
-    "opentelemetry-test-utils",
 ]
 
 [tool.hatch.envs.default.scripts]
@@ -67,7 +71,7 @@ test = "pytest {args:tests}"
 check = [
     "ruff check ./src",
     "ruff format --check ./src",
-    "mypy --install-types --non-interactive {args:src}",
+    "mypy --install-types --non-interactive -p src",
     "bandit -r ./src",
 ]
 
@@ -76,6 +80,7 @@ asyncio_mode = "auto"
 addopts = "--cov=./src"
 testpaths = ["./tests"]
 filterwarnings = "ignore::DeprecationWarning"
+pythonpath = ["src/"]
 
 [tool.coverage.run]
 source_pkgs = ["src"]
