@@ -68,7 +68,7 @@ test = "pytest {args:tests}"
 check = [
     "ruff check ./src",
     "ruff format --check ./src",
-    "mypy --install-types --non-interactive {args:src}",
+    "mypy --install-types --non-interactive -p src",
     "bandit -r ./src",
 ]
 
