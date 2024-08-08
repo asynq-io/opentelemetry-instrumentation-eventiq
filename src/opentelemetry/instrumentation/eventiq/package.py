@@ -1,2 +1,2 @@
-_instruments = ("eventiq >= 0.5.0",)
+_instruments = ("eventiq == 0.3.0rc1",)
 _supports_metrics = True

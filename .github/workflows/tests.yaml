@@ -1,9 +1,8 @@
-
 name: Tests
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     types:
       - opened
@@ -28,4 +27,3 @@ jobs:
         run: pipx install hatch
       - name: Ruff
         run: hatch run default:check
-

@@ -27,6 +27,17 @@ repos:
         args: ["--skip", "B101"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.2.0
+    rev: v1.11.1
     hooks:
       - id: mypy
+        args:
+          [
+            "--install-types",
+            "--non-interactive",
+            "--enable-incomplete-feature=Unpack",
+          ]
+        additional_dependencies:
+          - eventiq==0.3.0rc1
+          - opentelemetry-instrumentation
+          - opentelemetry-api
+          - opentelemetry-sdk

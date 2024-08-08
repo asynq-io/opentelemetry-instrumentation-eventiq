@@ -1,18 +1,91 @@
-from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
+from __future__ import annotations
 
-from eventiq.broker import Broker
+from typing import Any
 
-from ._middleware import OpenTelemetryMiddleware
+from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
+    BaseInstrumentor,
+)
+
+from eventiq.service import Service
+
+from .middlewares import OpentelemetryMetricsMiddleware, OpenTelemetryTracingMiddleware
+from .model import TraceContextCloudEvent
+from .package import _instruments
+from .version import __version__
+
+
+class _OpentelemetryMiddlewareFactory:
+    def __init__(
+        self,
+        cls: type[OpentelemetryMetricsMiddleware | OpenTelemetryTracingMiddleware],
+        **kwargs: Any,
+    ) -> None:
+        self.cls = cls
+        self.kwargs = kwargs
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        kwargs.update(self.kwargs)
+        return self.cls(*args, **kwargs)
 
 
 class EventiqInstrumentator(BaseInstrumentor):
-    def _instrument(self, **kwargs):
+    def instrumentation_dependencies(self) -> tuple[str, ...]:
+        return _instruments
+
+    def instrument_service(
+        self, service: Service, enable_metrics: bool = True, **kwargs: Any
+    ) -> None:
         tracer_provider = kwargs.get("tracer_provider")
         record_exceptions = kwargs.get("record_exceptions", True)
-        middleware = OpenTelemetryMiddleware(tracer_provider, record_exceptions)
-        Broker.default_middlewares.append(middleware)
+        service.add_middleware(
+            OpenTelemetryTracingMiddleware,
+            tracer_provider=tracer_provider,
+            record_exceptions=record_exceptions,
+        )
+        if enable_metrics:
+            meter_provider = kwargs.get("meter_provider")
+            service.add_middleware(
+                OpentelemetryMetricsMiddleware, meter_provider=meter_provider
+            )
 
-    def _uninstrument(self, **kwargs):
-        for middleware in Broker.default_middelwares:
-            if isinstance(middleware, OpenTelemetryMiddleware):
-                Broker.default_middlewares.remove(middleware)
+    def uninstrument_service(self, service: Service) -> None:
+        service.middlewares = [
+            m
+            for m in service.middlewares
+            if not isinstance(
+                m, (OpentelemetryMetricsMiddleware, OpenTelemetryTracingMiddleware)
+            )
+        ]
+
+    def _instrument(self, **kwargs: Any) -> None:
+        tracer_provider = kwargs.get("tracer_provider")
+        record_exceptions = kwargs.get("record_exceptions", True)
+        Service.default_middlewares.append(
+            _OpentelemetryMiddlewareFactory(
+                OpenTelemetryTracingMiddleware,
+                tracer_provider=tracer_provider,
+                record_exceptions=record_exceptions,
+            )
+        )
+        meter_provider = kwargs.get("meter_provider")
+        Service.default_middlewares.append(
+            _OpentelemetryMiddlewareFactory(
+                OpentelemetryMetricsMiddleware, meter_provider=meter_provider
+            )
+        )
+
+    def _uninstrument(self, **kwargs: Any) -> None:
+        Service.default_middlewares = [
+            m
+            for m in Service.default_middlewares
+            if not isinstance(m, _OpentelemetryMiddlewareFactory)
+        ]
+
+
+__all__ = [
+    "EventiqInstrumentator",
+    "TraceContextCloudEvent",
+    "OpentelemetryMetricsMiddleware",
+    "OpenTelemetryTracingMiddleware",
+    "__version__",
+]
