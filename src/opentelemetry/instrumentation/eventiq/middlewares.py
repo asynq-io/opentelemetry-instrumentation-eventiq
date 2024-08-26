@@ -25,11 +25,8 @@ from .version import __version__
 
 if TYPE_CHECKING:
     from contextlib import AbstractContextManager
-
-    from eventiq.consumer import Consumer
+    from eventiq import Consumer, CloudEvent, Service
     from eventiq.exceptions import Fail, Retry, Skip
-    from eventiq.models import CloudEvent
-    from eventiq.service import Service
     from eventiq.types import ID
 
 
