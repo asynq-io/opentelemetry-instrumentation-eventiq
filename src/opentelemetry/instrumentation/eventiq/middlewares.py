@@ -19,6 +19,9 @@ from opentelemetry.trace import (
 
 from eventiq.middleware import Middleware
 
+from .model import TraceContextCloudEvent
+from .version import __version__
+
 if TYPE_CHECKING:
     from contextlib import AbstractContextManager
 
@@ -27,10 +30,6 @@ if TYPE_CHECKING:
     from eventiq.models import CloudEvent
     from eventiq.service import Service
     from eventiq.types import ID
-
-
-from .model import TraceContextCloudEvent
-from .version import __version__
 
 
 class EventiqGetter(Getter[TraceContextCloudEvent]):
