@@ -4,8 +4,6 @@ import time
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
-from eventiq.middleware import Middleware
-
 from opentelemetry.metrics import MeterProvider, get_meter
 from opentelemetry.propagate import extract, inject
 from opentelemetry.propagators.textmap import Getter, Setter
@@ -19,14 +17,18 @@ from opentelemetry.trace import (
     use_span,
 )
 
+from eventiq.middleware import Middleware
+from eventiq.models import CloudEvent
 
 from .model import TraceContextCloudEvent
 from .version import __version__
 
 if TYPE_CHECKING:
     from contextlib import AbstractContextManager
-    from eventiq import Consumer, CloudEvent, Service
+
+    from eventiq.consumer import Consumer
     from eventiq.exceptions import Fail, Retry, Skip
+    from eventiq.service import Service
     from eventiq.types import ID
 
 
@@ -160,7 +162,7 @@ class OpenTelemetryTracingMiddleware(Middleware[TraceContextCloudEvent]):
             activation.__exit__(None, None, None)
 
 
-class OpentelemetryMetricsMiddleware(Middleware):
+class OpentelemetryMetricsMiddleware(Middleware[CloudEvent]):
     def __init__(
         self,
         service: Service,
