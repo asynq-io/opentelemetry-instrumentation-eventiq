@@ -1,9 +1,9 @@
 from pydantic import Field
 
-from eventiq.models import CloudEvent
+from eventiq.models import CloudEvent, D
 
 
-class TraceContextCloudEvent(CloudEvent):
+class TraceContextCloudEvent(CloudEvent[D], abstract=True):
     tracecontext: dict[str, str] = Field({}, description="Distributed tracing context")
 
     @property

@@ -14,7 +14,7 @@ from .package import _instruments
 from .version import __version__
 
 
-class _OpentelemetryMiddlewareFactory:
+class OpentelemetryMiddlewareFactory:
     def __init__(
         self,
         cls: type[OpentelemetryMetricsMiddleware | OpenTelemetryTracingMiddleware],
@@ -61,7 +61,7 @@ class EventiqInstrumentator(BaseInstrumentor):
         tracer_provider = kwargs.get("tracer_provider")
         record_exceptions = kwargs.get("record_exceptions", True)
         Service.default_middlewares.append(
-            _OpentelemetryMiddlewareFactory(
+            OpentelemetryMiddlewareFactory(
                 OpenTelemetryTracingMiddleware,
                 tracer_provider=tracer_provider,
                 record_exceptions=record_exceptions,
@@ -69,7 +69,7 @@ class EventiqInstrumentator(BaseInstrumentor):
         )
         meter_provider = kwargs.get("meter_provider")
         Service.default_middlewares.append(
-            _OpentelemetryMiddlewareFactory(
+            OpentelemetryMiddlewareFactory(
                 OpentelemetryMetricsMiddleware, meter_provider=meter_provider
             )
         )
@@ -78,7 +78,7 @@ class EventiqInstrumentator(BaseInstrumentor):
         Service.default_middlewares = [
             m
             for m in Service.default_middlewares
-            if not isinstance(m, _OpentelemetryMiddlewareFactory)
+            if not isinstance(m, OpentelemetryMiddlewareFactory)
         ]
 
 

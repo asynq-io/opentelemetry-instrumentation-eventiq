@@ -18,19 +18,18 @@ from opentelemetry.trace import (
 )
 
 from eventiq.middleware import Middleware
+from eventiq.models import CloudEvent
+
+from .model import TraceContextCloudEvent
+from .version import __version__
 
 if TYPE_CHECKING:
     from contextlib import AbstractContextManager
 
     from eventiq.consumer import Consumer
     from eventiq.exceptions import Fail, Retry, Skip
-    from eventiq.models import CloudEvent
     from eventiq.service import Service
     from eventiq.types import ID
-
-
-from .model import TraceContextCloudEvent
-from .version import __version__
 
 
 class EventiqGetter(Getter[TraceContextCloudEvent]):
@@ -149,7 +148,9 @@ class OpenTelemetryTracingMiddleware(Middleware[TraceContextCloudEvent]):
         activation = use_span(span, end_on_exit=True)
         activation.__enter__()
         self.publish_span_registry[message.id] = (span, activation)
-        inject(message, setter=eventiq_setter)
+
+        if not message.tracecontext:
+            inject(message, setter=eventiq_setter)
 
     async def after_publish(
         self, *, message: TraceContextCloudEvent, **kwargs: Any
@@ -161,7 +162,7 @@ class OpenTelemetryTracingMiddleware(Middleware[TraceContextCloudEvent]):
             activation.__exit__(None, None, None)
 
 
-class OpentelemetryMetricsMiddleware(Middleware):
+class OpentelemetryMetricsMiddleware(Middleware[CloudEvent]):
     def __init__(
         self,
         service: Service,
@@ -194,7 +195,7 @@ class OpentelemetryMetricsMiddleware(Middleware):
         self.message_durations = self.meter.create_histogram(
             self.format("messages_duration"), "Message processing durations"
         )
-        self.message_start_times: dict[int, int] = {}
+        self.message_start_times: dict[tuple[str, ID], int] = {}
 
     def format(self, value: str) -> str:
         return f"{self.prefix}_{value}" if self.prefix else value
@@ -213,7 +214,7 @@ class OpentelemetryMetricsMiddleware(Middleware):
                 "consumer": consumer.name,
             },
         )
-        self.message_start_times[id(message)] = self.current_millis()
+        self.message_start_times[(consumer.name, message.id)] = self.current_millis()
 
     async def after_process_message(
         self,
@@ -229,7 +230,7 @@ class OpentelemetryMetricsMiddleware(Middleware):
         }
         self.in_progress.add(-1, attributes)
         message_start_time = self.message_start_times.pop(
-            id(message), self.current_millis()
+            (consumer.name, message.id), self.current_millis()
         )
         self.message_durations.record(message_start_time, attributes)
         self.total.add(1, attributes)

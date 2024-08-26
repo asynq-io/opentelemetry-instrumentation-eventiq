@@ -57,7 +57,7 @@ dependencies = [
     "pytest",
     "pyyaml",
     "pytest-cov",
-    "ruff",
+    "ruff==0.5.7",
     "mypy",
     "bandit",
     "opentelemetry-test-utils",
