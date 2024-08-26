@@ -195,7 +195,7 @@ class OpentelemetryMetricsMiddleware(Middleware[CloudEvent]):
         self.message_durations = self.meter.create_histogram(
             self.format("messages_duration"), "Message processing durations"
         )
-        self.message_start_times: dict[int, int] = {}
+        self.message_start_times: dict[tuple[str, ID], int] = {}
 
     def format(self, value: str) -> str:
         return f"{self.prefix}_{value}" if self.prefix else value
@@ -214,7 +214,7 @@ class OpentelemetryMetricsMiddleware(Middleware[CloudEvent]):
                 "consumer": consumer.name,
             },
         )
-        self.message_start_times[id(message)] = self.current_millis()
+        self.message_start_times[(consumer.name, message.id)] = self.current_millis()
 
     async def after_process_message(
         self,
@@ -230,7 +230,7 @@ class OpentelemetryMetricsMiddleware(Middleware[CloudEvent]):
         }
         self.in_progress.add(-1, attributes)
         message_start_time = self.message_start_times.pop(
-            id(message), self.current_millis()
+            (consumer.name, message.id), self.current_millis()
         )
         self.message_durations.record(message_start_time, attributes)
         self.total.add(1, attributes)
