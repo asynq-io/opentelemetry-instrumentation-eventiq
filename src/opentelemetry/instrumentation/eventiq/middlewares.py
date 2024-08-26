@@ -4,6 +4,8 @@ import time
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
+from eventiq.middleware import Middleware
+
 from opentelemetry.metrics import MeterProvider, get_meter
 from opentelemetry.propagate import extract, inject
 from opentelemetry.propagators.textmap import Getter, Setter
@@ -17,7 +19,6 @@ from opentelemetry.trace import (
     use_span,
 )
 
-from eventiq.middleware import Middleware
 
 from .model import TraceContextCloudEvent
 from .version import __version__
