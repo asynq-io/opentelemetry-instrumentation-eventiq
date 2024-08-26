@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
+from opentelemetry.instrumentation.instrumentor import (
     BaseInstrumentor,
 )
 

@@ -1,9 +1,4 @@
 repos:
-  - repo: https://github.com/asottile/yesqa
-    rev: v1.2.3
-    hooks:
-      - id: yesqa
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
@@ -14,7 +9,7 @@ repos:
         args: [--allow-multiple-documents]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.1.13"
+    rev: "v0.5.2"
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -30,14 +25,6 @@ repos:
     rev: v1.11.1
     hooks:
       - id: mypy
-        args:
-          [
-            "--install-types",
-            "--non-interactive",
-            "--enable-incomplete-feature=Unpack",
-          ]
+        args: ["--install-types", "--non-interactive"]
         additional_dependencies:
-          - eventiq==0.3.0rc1
-          - opentelemetry-instrumentation
-          - opentelemetry-api
-          - opentelemetry-sdk
+          - "eventiq>1.0"
