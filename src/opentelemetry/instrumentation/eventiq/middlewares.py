@@ -149,8 +149,7 @@ class OpenTelemetryTracingMiddleware(Middleware[TraceContextCloudEvent]):
         activation.__enter__()
         self.publish_span_registry[message.id] = (span, activation)
 
-        if not message.tracecontext:
-            inject(message, setter=eventiq_setter)
+        inject(message, setter=eventiq_setter)
 
     async def after_publish(
         self, *, message: TraceContextCloudEvent, **kwargs: Any
