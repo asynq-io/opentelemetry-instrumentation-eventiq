@@ -138,7 +138,7 @@ class OpenTelemetryTracingMiddleware(Middleware[TraceContextCloudEvent]):
     async def before_publish(
         self, *, message: TraceContextCloudEvent, **kwargs: Any
     ) -> None:
-        source = message.source or "unknown"
+        source = message.source or self.service.name
 
         span = self.tracer.start_span(
             f"{source} publish",
