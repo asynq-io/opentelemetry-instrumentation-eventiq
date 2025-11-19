@@ -138,11 +138,13 @@ class OpenTelemetryTracingMiddleware(Middleware[TraceContextCloudEvent]):
     async def before_publish(
         self, *, message: TraceContextCloudEvent, **kwargs: Any
     ) -> None:
+        trace_ctx = extract(message, getter=eventiq_getter)
         source = message.source or self.service.name
 
         span = self.tracer.start_span(
             f"{source} publish",
             kind=SpanKind.PRODUCER,
+            context=trace_ctx,
             attributes=self._get_span_attributes(message),
         )
         activation = use_span(span, end_on_exit=True)
