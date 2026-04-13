@@ -112,7 +112,7 @@ class OpenTelemetryTracingMiddleware(Middleware[TraceContextCloudEvent]):
             activation,
         )
 
-    async def after_process_message(
+    async def after_message_finalized(
         self,
         *,
         consumer: Consumer,
